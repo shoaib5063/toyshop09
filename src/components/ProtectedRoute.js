@@ -1,16 +1,17 @@
 import React from 'react';
-import { Navigate  } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = () => {
   const auth = getAuth();
   const user = auth.currentUser;
+  const location = useLocation();
 
   if (!user) {
-    return <Navigate  to="/login" />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children;
+  return <Outlet />;
 };
 
 export default ProtectedRoute;
