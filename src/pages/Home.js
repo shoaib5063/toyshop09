@@ -24,7 +24,7 @@ const Home = () => {
       price: 49.99,
       availableQuantity: 75,
       description: 'A timeless set of colorful Lego bricks that encourages creativity and problem-solving. Kids can build anything they imagine, from houses to vehicles.',
-      pictureURL: require('../assets/images/Lego Classic Bricks.png')
+      pictureURL: 'https://ibb.co.com/9X8bhs4'
     },
     {
       toyId: 2,
@@ -36,7 +36,7 @@ const Home = () => {
       price: 89.50,
       availableQuantity: 30,
       description: 'High-speed remote control car with advanced steering and durable design for outdoor adventures.',
-      pictureURL: require('../assets/images/RC Speedster Car.png')
+      pictureURL: 'https://ibb.co.com/1G9tCKqD'
     },
     {
       toyId: 3,
@@ -48,7 +48,7 @@ const Home = () => {
       price: 25.00,
       availableQuantity: 120,
       description: 'Super soft and cuddly teddy bear perfect for bedtime stories and comfort.',
-      pictureURL: require('../assets/images/Cuddly Teddy Bear.png')
+      pictureURL: 'https://ibb.co.com/rKNqDw70'
     },
     {
       toyId: 4,
@@ -60,7 +60,7 @@ const Home = () => {
       price: 129.99,
       availableQuantity: 15,
       description: 'Complete space station with astronaut figures and realistic space exploration features.',
-      pictureURL: require('../assets/images/Space Station Playset.png')
+      pictureURL: 'https://ibb.co.com/BVnj9vM5'
     },
     {
       toyId: 5,
@@ -72,7 +72,7 @@ const Home = () => {
       price: 19.99,
       availableQuantity: 85,
       description: 'Colorful educational puzzle that helps develop problem-solving skills and hand-eye coordination.',
-      pictureURL: require('../assets/images/Educational Puzzle.png')
+      pictureURL: 'https://ibb.co.com/cSKCmfFm'
     },
     {
       toyId: 6,
@@ -84,7 +84,7 @@ const Home = () => {
       price: 34.99,
       availableQuantity: 45,
       description: 'Set of superhero action figures with moveable joints and accessories.',
-      pictureURL: require('../assets/images/Action Figure Set.png')
+      pictureURL: 'https://ibb.co.com/yBF4vDr5'
     }
   ];
 

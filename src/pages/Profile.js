@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth, updateProfile, updatePassword, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -47,10 +48,20 @@ const Profile = () => {
       });
       
       setEditing(false);
-      alert('Profile updated successfully!');
+      Swal.fire({
+        icon: 'success',
+        title: 'Profile Updated',
+        text: 'Your profile has been updated successfully.',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'Failed to update profile. Please try again.'
+      });
     } finally {
       setSaving(false);
     }
@@ -60,12 +71,20 @@ const Profile = () => {
     e.preventDefault();
     
     if (newPassword !== confirmPassword) {
-      alert('New passwords do not match!');
+      Swal.fire({
+        icon: 'error',
+        title: 'Password Mismatch',
+        text: 'New passwords do not match!'
+      });
       return;
     }
     
     if (newPassword.length < 6) {
-      alert('Password must be at least 6 characters long!');
+      Swal.fire({
+        icon: 'error',
+        title: 'Weak Password',
+        text: 'Password must be at least 6 characters long!'
+      });
       return;
     }
     
@@ -77,10 +96,20 @@ const Profile = () => {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      alert('Password changed successfully!');
+      Swal.fire({
+        icon: 'success',
+        title: 'Password Changed',
+        text: 'Your password has been changed successfully.',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (error) {
       console.error('Error changing password:', error);
-      alert('Failed to change password. Please try again.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Change Failed',
+        text: 'Failed to change password. Please try again.'
+      });
     } finally {
       setSaving(false);
     }
