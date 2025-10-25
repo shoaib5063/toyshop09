@@ -24,7 +24,7 @@ const Home = () => {
       price: 49.99,
       availableQuantity: 75,
       description: 'A timeless set of colorful Lego bricks that encourages creativity and problem-solving. Kids can build anything they imagine, from houses to vehicles.',
-      pictureURL: 'https://ibb.co.com/9X8bhs4'
+      pictureURL: 'https://i.ibb.co.com/bR5bwxkL/Lego-Classic-Bricks.png'
     },
     {
       toyId: 2,
@@ -36,7 +36,7 @@ const Home = () => {
       price: 89.50,
       availableQuantity: 30,
       description: 'High-speed remote control car with advanced steering and durable design for outdoor adventures.',
-      pictureURL: 'https://ibb.co.com/1G9tCKqD'
+      pictureURL: 'https://i.ibb.co.com/Q37C5SN5/RC-Speedster-Car.png'
     },
     {
       toyId: 3,
@@ -48,7 +48,7 @@ const Home = () => {
       price: 25.00,
       availableQuantity: 120,
       description: 'Super soft and cuddly teddy bear perfect for bedtime stories and comfort.',
-      pictureURL: 'https://ibb.co.com/rKNqDw70'
+      pictureURL: 'https://i.ibb.co.com/hRYHSrzJ/Cuddly-Teddy-Bear.png'
     },
     {
       toyId: 4,
@@ -60,7 +60,7 @@ const Home = () => {
       price: 129.99,
       availableQuantity: 15,
       description: 'Complete space station with astronaut figures and realistic space exploration features.',
-      pictureURL: 'https://ibb.co.com/BVnj9vM5'
+      pictureURL: 'https://i.ibb.co.com/DPTm0RVW/Space-Station-Playset.png'
     },
     {
       toyId: 5,
@@ -72,7 +72,7 @@ const Home = () => {
       price: 19.99,
       availableQuantity: 85,
       description: 'Colorful educational puzzle that helps develop problem-solving skills and hand-eye coordination.',
-      pictureURL: 'https://ibb.co.com/cSKCmfFm'
+      pictureURL: 'https://i.ibb.co.com/9Hqkx2TF/Educational-Puzzle.png'
     },
     {
       toyId: 6,
@@ -84,7 +84,7 @@ const Home = () => {
       price: 34.99,
       availableQuantity: 45,
       description: 'Set of superhero action figures with moveable joints and accessories.',
-      pictureURL: 'https://ibb.co.com/yBF4vDr5'
+      pictureURL: 'https://i.ibb.co.com/yTf6pWk/Action-Figure-Set.png'
     }
   ];
 
@@ -93,7 +93,7 @@ const Home = () => {
       id: 1,
       title: 'Discover Amazing Toys',
       subtitle: 'Find the perfect toy for every child',
-      image: 'https://i.ibb.co/7QZ8Qz/slider1.jpg',
+      image: 'https://i.ibb.co/bR5bwxkL/Lego-Classic-Bricks.png',
       buttonText: 'Shop Now'
     },
     {
