@@ -18,19 +18,54 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-blue-500 text-white p-4 flex justify-between items-center">
-      <h1 className="text-2xl">ToyTopia</h1>
-      <ul className="flex space-x-6">
-        <li><Link to="/">Home</Link></li>
-        {user ? (
-          <>
-            <li><Link to="/profile">{user.displayName}</Link></li>
-            <li><button onClick={handleLogout}>Logout</button></li>
-          </>
-        ) : (
-          <li><Link to="/login">Login</Link></li>
-        )}
-      </ul>
+    <nav className="bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <div className="bg-white p-2 rounded-lg mr-3">
+              <span className="text-blue-600 font-bold text-lg">📦</span>
+            </div>
+            <span className="text-white font-bold text-xl">ToyVerse</span>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="flex items-center space-x-1">
+            <Link
+              to="/"
+              className="text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Home
+            </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  My Profile
+                </Link>
+                <span className="text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md text-sm font-medium">
+                  My Cart
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Login
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
     </nav>
   );
 };
