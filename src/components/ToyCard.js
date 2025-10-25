@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const ToyCard = ({ toy }) => {
   const renderStars = (rating) => {
@@ -16,6 +17,8 @@ const ToyCard = ({ toy }) => {
     return stars;
   };
 
+  const toyId = toy.toyId || toy.id;
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       {/* Image */}
@@ -24,6 +27,9 @@ const ToyCard = ({ toy }) => {
           src={toy.pictureURL || '/api/placeholder/300/200'} 
           alt={toy.toyName} 
           className="w-full h-48 object-cover"
+          onError={(e) => {
+            e.target.src = '/api/placeholder/300/200';
+          }}
         />
       </div>
       
@@ -31,7 +37,7 @@ const ToyCard = ({ toy }) => {
       <div className="p-4">
         {/* Category */}
         <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-          {toy.category || 'Building Blocks'}
+          {toy.subCategory || toy.category || 'Building Blocks'}
         </p>
         
         {/* Title */}
@@ -56,9 +62,12 @@ const ToyCard = ({ toy }) => {
           <span className="text-lg font-bold text-blue-600">
             ${toy.price || '49.99'}
           </span>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+          <Link
+            to={`/toy/${toyId}`}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          >
             View More
-          </button>
+          </Link>
         </div>
       </div>
     </div>

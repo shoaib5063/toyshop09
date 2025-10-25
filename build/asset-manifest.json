@@ -1,13 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.7fe9e938.css",
-    "main.js": "/static/js/main.31fd1811.js",
+    "main.css": "/static/css/main.8557a38a.css",
+    "main.js": "/static/js/main.0d14cc72.js",
+    "static/media/Space Station Playset.png": "/static/media/Space Station Playset.1dd5bc3a7a7a17e46c8b.png",
+    "static/media/Cuddly Teddy Bear.png": "/static/media/Cuddly Teddy Bear.902772cd301bdb445c92.png",
+    "static/media/Educational Puzzle.png": "/static/media/Educational Puzzle.bb09aed11ba821e211a6.png",
+    "static/media/Action Figure Set.png": "/static/media/Action Figure Set.2e1a64999198266e239f.png",
+    "static/media/Lego Classic Bricks.png": "/static/media/Lego Classic Bricks.47063171b9f4f992beb3.png",
+    "static/media/RC Speedster Car.png": "/static/media/RC Speedster Car.cb0821af3f425abc37df.png",
     "index.html": "/index.html",
-    "main.7fe9e938.css.map": "/static/css/main.7fe9e938.css.map",
-    "main.31fd1811.js.map": "/static/js/main.31fd1811.js.map"
+    "main.8557a38a.css.map": "/static/css/main.8557a38a.css.map",
+    "main.0d14cc72.js.map": "/static/js/main.0d14cc72.js.map"
   },
   "entrypoints": [
-    "static/css/main.7fe9e938.css",
-    "static/js/main.31fd1811.js"
+    "static/css/main.8557a38a.css",
+    "static/js/main.0d14cc72.js"
   ]
 }

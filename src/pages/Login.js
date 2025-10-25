@@ -1,23 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    document.title = 'ToyVerse - Login';
+    
+    // Get email from location state (from forgot password)
+    if (location.state?.email) {
+      setEmail(location.state.email);
+    }
+  }, [location.state]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     const auth = getAuth();
+    
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/');
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Welcome Back!',
+        text: 'You have successfully logged in.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      
+      // Navigate to intended page or home
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (error) {
       console.error('Login failed:', error);
-      alert('Login failed. Please check your credentials.');
+      
+      let errorMessage = 'Login failed. Please try again.';
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email address.';
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = 'Incorrect password. Please try again.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many failed attempts. Please try again later.';
+      }
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: errorMessage,
+      });
     } finally {
       setLoading(false);
     }
@@ -27,12 +66,33 @@ const Login = () => {
     setLoading(true);
     const auth = getAuth();
     const provider = new GoogleAuthProvider();
+    
     try {
       await signInWithPopup(auth, provider);
-      navigate('/');
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Welcome!',
+        text: 'You have successfully logged in with Google.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (error) {
       console.error('Google login failed:', error);
-      alert('Google login failed. Please try again.');
+      
+      let errorMessage = 'Google login failed. Please try again.';
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Login cancelled. Please try again.';
+      }
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Google Login Failed',
+        text: errorMessage,
+      });
     } finally {
       setLoading(false);
     }
@@ -73,7 +133,11 @@ const Login = () => {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+                <Link 
+                  to="/forgot-password" 
+                  state={{ email }}
+                  className="text-sm text-blue-600 hover:text-blue-500"
+                >
                   Forgot password?
                 </Link>
               </div>
@@ -123,6 +187,26 @@ const Login = () => {
             </svg>
             Sign in with Google
           </button>
+
+          {/* Test Button - Remove in production */}
+          <div className="mt-4">
+            <button
+              onClick={async () => {
+                try {
+                  const auth = getAuth();
+                  console.log('Auth object:', auth);
+                  console.log('Firebase config:', auth.app.options);
+                  alert('Firebase is connected! Check console for details.');
+                } catch (error) {
+                  console.error('Firebase error:', error);
+                  alert('Firebase connection error: ' + error.message);
+                }
+              }}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              Test Firebase Connection
+            </button>
+          </div>
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
