@@ -11,7 +11,6 @@ const Navbar = () => {
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Auth state changed:', user); // Debug log
       setUser(user);
       setLoading(false);
     });
@@ -79,11 +78,6 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-
-            {/* Debug info - remove in production */}
-            <div className="text-xs text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-              {loading ? 'Loading...' : user ? `User: ${user.email}` : 'No user'}
-            </div>
 
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-white bg-opacity-20 animate-pulse"></div>

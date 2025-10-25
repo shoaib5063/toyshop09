@@ -1,7 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { db } from '../firebase/firebaseConfig';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import Swal from 'sweetalert2';
 
 const ToyCard = ({ toy }) => {
+  const [user, setUser] = useState(null);
+  const [buying, setBuying] = useState(false);
+
+  React.useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -15,6 +30,85 @@ const ToyCard = ({ toy }) => {
     }
     
     return stars;
+  };
+
+  const handleBuyToy = async () => {
+    if (!user) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Login Required',
+        text: 'Please login to buy toys.',
+        confirmButtonText: 'Go to Login',
+        showCancelButton: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/login';
+        }
+      });
+      return;
+    }
+
+    setBuying(true);
+
+    try {
+      // Check if user already owns this toy
+      const q = query(
+        collection(db, 'userToys'),
+        where('userId', '==', user.uid),
+        where('toyId', '==', toy.toyId || toy.id)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Already Owned',
+          text: 'You already own this toy! Check your "My Toys" page.',
+        });
+        return;
+      }
+
+      // Add toy to user's collection
+      const purchaseData = {
+        userId: user.uid,
+        toyId: toy.toyId || toy.id,
+        toyName: toy.toyName,
+        price: toy.price,
+        pictureURL: toy.pictureURL,
+        subCategory: toy.subCategory || toy.category,
+        rating: toy.rating,
+        description: toy.description,
+        sellerName: toy.sellerName,
+        sellerEmail: toy.sellerEmail,
+        purchaseDate: new Date(),
+        status: 'purchased'
+      };
+
+      await addDoc(collection(db, 'userToys'), purchaseData);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Purchase Successful!',
+        text: `You have successfully purchased ${toy.toyName}! Check your "My Toys" page.`,
+        confirmButtonText: 'View My Toys',
+        showCancelButton: true,
+        cancelButtonText: 'Continue Shopping'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/my-toys';
+        }
+      });
+
+    } catch (error) {
+      console.error('Error purchasing toy:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Purchase Failed',
+        text: 'Failed to purchase toy. Please try again.',
+      });
+    } finally {
+      setBuying(false);
+    }
   };
 
   const toyId = toy.toyId || toy.id;
@@ -57,17 +151,28 @@ const ToyCard = ({ toy }) => {
           </div>
         </div>
         
-        {/* Price and Button */}
-        <div className="flex items-center justify-between">
+        {/* Price and Buttons */}
+        <div className="flex items-center justify-between mb-3">
           <span className="text-lg font-bold text-blue-600">
             ${toy.price || '49.99'}
           </span>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex space-x-2">
           <Link
             to={`/toy/${toyId}`}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
           >
-            View More
+            Details
           </Link>
+          <button
+            onClick={handleBuyToy}
+            disabled={buying}
+            className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {buying ? 'Buying...' : 'Buy Now'}
+          </button>
         </div>
       </div>
     </div>

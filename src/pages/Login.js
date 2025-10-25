@@ -25,7 +25,9 @@ const Login = () => {
     const auth = getAuth();
     
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      console.log('Attempting email/password login...');
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      console.log('Login successful:', result.user);
       
       Swal.fire({
         icon: 'success',
@@ -40,16 +42,32 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (error) {
       console.error('Login failed:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
       
       let errorMessage = 'Login failed. Please try again.';
-      if (error.code === 'auth/user-not-found') {
-        errorMessage = 'No account found with this email address.';
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = 'Incorrect password. Please try again.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = 'Too many failed attempts. Please try again later.';
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'Incorrect password. Please try again.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many failed attempts. Please try again later.';
+          break;
+        case 'auth/operation-not-allowed':
+          errorMessage = 'Email/password sign-in is not enabled. Please contact support.';
+          break;
+        case 'auth/invalid-credential':
+          errorMessage = 'Invalid email or password. Please check your credentials.';
+          break;
+        default:
+          errorMessage = `Login failed: ${error.message}`;
       }
       
       Swal.fire({
@@ -68,7 +86,9 @@ const Login = () => {
     const provider = new GoogleAuthProvider();
     
     try {
-      await signInWithPopup(auth, provider);
+      console.log('Attempting Google login...');
+      const result = await signInWithPopup(auth, provider);
+      console.log('Google login successful:', result.user);
       
       Swal.fire({
         icon: 'success',
@@ -82,10 +102,29 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (error) {
       console.error('Google login failed:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
       
       let errorMessage = 'Google login failed. Please try again.';
-      if (error.code === 'auth/popup-closed-by-user') {
-        errorMessage = 'Login cancelled. Please try again.';
+      
+      switch (error.code) {
+        case 'auth/popup-closed-by-user':
+          errorMessage = 'Login cancelled. Please try again.';
+          break;
+        case 'auth/popup-blocked':
+          errorMessage = 'Popup was blocked by browser. Please allow popups and try again.';
+          break;
+        case 'auth/cancelled-popup-request':
+          errorMessage = 'Login request was cancelled.';
+          break;
+        case 'auth/operation-not-allowed':
+          errorMessage = 'Google sign-in is not enabled. Please contact support.';
+          break;
+        case 'auth/unauthorized-domain':
+          errorMessage = 'This domain is not authorized for Google sign-in.';
+          break;
+        default:
+          errorMessage = `Google login failed: ${error.message}`;
       }
       
       Swal.fire({
@@ -188,25 +227,7 @@ const Login = () => {
             Sign in with Google
           </button>
 
-          {/* Test Button - Remove in production */}
-          <div className="mt-4">
-            <button
-              onClick={async () => {
-                try {
-                  const auth = getAuth();
-                  console.log('Auth object:', auth);
-                  console.log('Firebase config:', auth.app.options);
-                  alert('Firebase is connected! Check console for details.');
-                } catch (error) {
-                  console.error('Firebase error:', error);
-                  alert('Firebase connection error: ' + error.message);
-                }
-              }}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-            >
-              Test Firebase Connection
-            </button>
-          </div>
+
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center">

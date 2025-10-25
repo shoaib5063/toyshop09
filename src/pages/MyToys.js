@@ -1,32 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { db } from '../firebase/firebaseConfig';
-import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, query, where, addDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const MyToys = () => {
   const [user, setUser] = useState(null);
   const [toys, setToys] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [editingToy, setEditingToy] = useState(null);
-  const [saving, setSaving] = useState(false);
-  
-  // Form states
-  const [formData, setFormData] = useState({
-    toyName: '',
-    category: '',
-    price: '',
-    rating: '',
-    availableQuantity: '',
-    pictureURL: '',
-    description: ''
-  });
   
   const navigate = useNavigate();
   const auth = getAuth();
 
   useEffect(() => {
+    document.title = 'ToyVerse - My Toys';
+    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
@@ -41,104 +30,65 @@ const MyToys = () => {
 
   const fetchUserToys = async (userId) => {
     try {
-      const q = query(collection(db, 'toys'), where('userId', '==', userId));
+      console.log('Fetching toys for user:', userId);
+      console.log('Database object:', db);
+      
+      const q = query(collection(db, 'userToys'), where('userId', '==', userId));
+      console.log('Query created:', q);
+      
       const querySnapshot = await getDocs(q);
-      const userToys = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      console.log('Query snapshot:', querySnapshot);
+      console.log('Number of docs:', querySnapshot.size);
+      
+      const userToys = querySnapshot.docs.map(doc => {
+        console.log('Doc data:', doc.id, doc.data());
+        return {
+          id: doc.id,
+          ...doc.data()
+        };
+      });
+      
+      console.log('Found toys:', userToys);
       setToys(userToys);
+      
+      // Show a temporary alert to confirm data loading
+      if (userToys.length === 0) {
+        console.log('No toys found for user');
+      } else {
+        console.log(`Found ${userToys.length} toys`);
+      }
+      
     } catch (error) {
       console.error('Error fetching toys:', error);
+      console.error('Error details:', error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error Loading Toys',
+        text: `Failed to load your toy collection: ${error.message}`,
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      toyName: '',
-      category: '',
-      price: '',
-      rating: '',
-      availableQuantity: '',
-      pictureURL: '',
-      description: ''
-    });
-    setEditingToy(null);
-    setShowAddForm(false);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-
-    try {
-      const toyData = {
-        ...formData,
-        price: parseFloat(formData.price),
-        rating: parseFloat(formData.rating),
-        availableQuantity: parseInt(formData.availableQuantity),
-        userId: user.uid,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      if (editingToy) {
-        // Update existing toy
-        await updateDoc(doc(db, 'toys', editingToy.id), {
-          ...toyData,
-          updatedAt: new Date()
-        });
-        alert('Toy updated successfully!');
-      } else {
-        // Add new toy
-        await addDoc(collection(db, 'toys'), toyData);
-        alert('Toy added successfully!');
-      }
-
-      fetchUserToys(user.uid);
-      resetForm();
-    } catch (error) {
-      console.error('Error saving toy:', error);
-      alert('Failed to save toy. Please try again.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleEdit = (toy) => {
-    setFormData({
-      toyName: toy.toyName,
-      category: toy.category,
-      price: toy.price.toString(),
-      rating: toy.rating.toString(),
-      availableQuantity: toy.availableQuantity.toString(),
-      pictureURL: toy.pictureURL || '',
-      description: toy.description || ''
-    });
-    setEditingToy(toy);
-    setShowAddForm(true);
-  };
-
   const handleDelete = async (toyId) => {
-    if (window.confirm('Are you sure you want to delete this toy?')) {
-      try {
-        await deleteDoc(doc(db, 'toys', toyId));
-        alert('Toy deleted successfully!');
-        fetchUserToys(user.uid);
-      } catch (error) {
-        console.error('Error deleting toy:', error);
-        alert('Failed to delete toy. Please try again.');
-      }
+    try {
+      await deleteDoc(doc(db, 'userToys', toyId));
+      Swal.fire({
+        icon: 'success',
+        title: 'Removed!',
+        text: 'Toy has been removed from your collection.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      fetchUserToys(user.uid);
+    } catch (error) {
+      console.error('Error deleting toy:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to remove toy. Please try again.',
+      });
     }
   };
 
@@ -160,171 +110,58 @@ const MyToys = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Toys</h1>
-            <p className="text-gray-600">Manage your toy collection</p>
+            <p className="text-gray-600">Your purchased toy collection</p>
+            <p className="text-sm text-gray-400">User ID: {user?.uid}</p>
           </div>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
-          >
-            Add New Toy
-          </button>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">Total Toys: {toys.length}</p>
+            <p className="text-lg font-semibold text-blue-600">
+              Total Value: ${toys.reduce((sum, toy) => sum + (toy.price || 0), 0).toFixed(2)}
+            </p>
+            {/* Test button - remove in production */}
+            <button
+              onClick={async () => {
+                try {
+                  const testToy = {
+                    userId: user.uid,
+                    toyId: 'test-' + Date.now(),
+                    toyName: 'Test Toy',
+                    price: 9.99,
+                    pictureURL: 'https://via.placeholder.com/300x200',
+                    subCategory: 'Test Category',
+                    rating: 5.0,
+                    description: 'This is a test toy',
+                    purchaseDate: new Date(),
+                    status: 'purchased'
+                  };
+                  
+                  await addDoc(collection(db, 'userToys'), testToy);
+                  Swal.fire('Success!', 'Test toy added', 'success');
+                  fetchUserToys(user.uid);
+                } catch (error) {
+                  console.error('Error adding test toy:', error);
+                  Swal.fire('Error!', error.message, 'error');
+                }
+              }}
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs mt-2"
+            >
+              Add Test Toy
+            </button>
+          </div>
         </div>
-
-        {/* Add/Edit Form Modal */}
-        {showAddForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-screen overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4">
-                {editingToy ? 'Edit Toy' : 'Add New Toy'}
-              </h2>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Toy Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="toyName"
-                    value={formData.toyName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category *
-                  </label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="Building Blocks">Building Blocks</option>
-                    <option value="Remote Control">Remote Control</option>
-                    <option value="Stuffed Animals">Stuffed Animals</option>
-                    <option value="Action Figures">Action Figures</option>
-                    <option value="Educational">Educational</option>
-                    <option value="Playsets">Playsets</option>
-                    <option value="Puzzles">Puzzles</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Price ($) *
-                    </label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      step="0.01"
-                      min="0"
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Rating (1-5) *
-                    </label>
-                    <input
-                      type="number"
-                      name="rating"
-                      value={formData.rating}
-                      onChange={handleInputChange}
-                      step="0.1"
-                      min="1"
-                      max="5"
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Available Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    name="availableQuantity"
-                    value={formData.availableQuantity}
-                    onChange={handleInputChange}
-                    min="0"
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Picture URL
-                  </label>
-                  <input
-                    type="url"
-                    name="pictureURL"
-                    value={formData.pictureURL}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="flex space-x-3 pt-4">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition-colors disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : (editingToy ? 'Update Toy' : 'Add Toy')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 rounded-md transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
 
         {/* Toys Grid */}
         {toys.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🧸</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No toys yet</h3>
-            <p className="text-gray-600 mb-4">Start building your toy collection by adding your first toy!</p>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
+            <div className="text-6xl mb-4">🛒</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No toys purchased yet</h3>
+            <p className="text-gray-600 mb-4">Start building your toy collection by purchasing toys from our store!</p>
+            <a
+              href="/"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors inline-block"
             >
-              Add Your First Toy
-            </button>
+              Browse Toys
+            </a>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -335,7 +172,13 @@ const MyToys = () => {
                     src={toy.pictureURL || '/api/placeholder/300/200'}
                     alt={toy.toyName}
                     className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      e.target.src = '/api/placeholder/300/200';
+                    }}
                   />
+                  <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    Owned
+                  </div>
                 </div>
                 
                 <div className="p-4">
@@ -344,32 +187,71 @@ const MyToys = () => {
                     <span className="text-lg font-bold text-blue-600">${toy.price}</span>
                   </div>
                   
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">{toy.category}</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">{toy.subCategory}</p>
                   
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
                       <span className="text-yellow-400">★</span>
                       <span className="text-sm text-gray-600 ml-1">{toy.rating}</span>
                     </div>
-                    <span className="text-sm text-gray-500">{toy.availableQuantity} left</span>
+                    <span className="text-sm text-gray-500">
+                      Purchased: {toy.purchaseDate ? new Date(toy.purchaseDate.toDate ? toy.purchaseDate.toDate() : toy.purchaseDate).toLocaleDateString() : 'Unknown'}
+                    </span>
                   </div>
                   
                   {toy.description && (
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">{toy.description}</p>
                   )}
+
+                  {toy.sellerName && (
+                    <p className="text-xs text-gray-500 mb-3">
+                      Sold by: {toy.sellerName}
+                    </p>
+                  )}
                   
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => handleEdit(toy)}
+                      onClick={() => {
+                        Swal.fire({
+                          icon: 'info',
+                          title: 'Toy Details',
+                          html: `
+                            <div class="text-left">
+                              <p><strong>Name:</strong> ${toy.toyName}</p>
+                              <p><strong>Category:</strong> ${toy.subCategory}</p>
+                              <p><strong>Price:</strong> $${toy.price}</p>
+                              <p><strong>Rating:</strong> ${toy.rating}/5</p>
+                              <p><strong>Purchase Date:</strong> ${toy.purchaseDate ? new Date(toy.purchaseDate.toDate ? toy.purchaseDate.toDate() : toy.purchaseDate).toLocaleDateString() : 'Unknown'}</p>
+                              ${toy.sellerName ? `<p><strong>Seller:</strong> ${toy.sellerName}</p>` : ''}
+                              ${toy.description ? `<p><strong>Description:</strong> ${toy.description}</p>` : ''}
+                            </div>
+                          `,
+                          confirmButtonText: 'Close'
+                        });
+                      }}
                       className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded text-sm transition-colors"
                     >
-                      Edit
+                      View Details
                     </button>
                     <button
-                      onClick={() => handleDelete(toy.id)}
+                      onClick={() => {
+                        Swal.fire({
+                          title: 'Remove from Collection?',
+                          text: 'Are you sure you want to remove this toy from your collection?',
+                          icon: 'warning',
+                          showCancelButton: true,
+                          confirmButtonColor: '#d33',
+                          cancelButtonColor: '#3085d6',
+                          confirmButtonText: 'Yes, remove it!'
+                        }).then((result) => {
+                          if (result.isConfirmed) {
+                            handleDelete(toy.id);
+                          }
+                        });
+                      }}
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded text-sm transition-colors"
                     >
-                      Delete
+                      Remove
                     </button>
                   </div>
                 </div>

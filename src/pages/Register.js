@@ -54,7 +54,10 @@ const Register = () => {
     const auth = getAuth();
 
     try {
+      console.log('Attempting registration...');
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('Registration successful:', userCredential.user);
+      
       await updateProfile(userCredential.user, { 
         displayName: name,
         photoURL: photoURL || null
@@ -71,14 +74,26 @@ const Register = () => {
       navigate('/');
     } catch (error) {
       console.error('Registration failed:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
       
       let errorMessage = 'Registration failed. Please try again.';
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'An account with this email already exists.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'Password is too weak. Please choose a stronger password.';
+      
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'An account with this email already exists.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'Password is too weak. Please choose a stronger password.';
+          break;
+        case 'auth/operation-not-allowed':
+          errorMessage = 'Email/password registration is not enabled. Please contact support.';
+          break;
+        default:
+          errorMessage = `Registration failed: ${error.message}`;
       }
       
       Swal.fire({

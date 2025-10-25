@@ -20,6 +20,8 @@ const Profile = () => {
   const auth = getAuth();
 
   useEffect(() => {
+    document.title = 'ToyVerse - My Profile';
+    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
@@ -275,18 +277,118 @@ const Profile = () => {
         {/* Account Statistics */}
         <div className="bg-white rounded-lg shadow-md p-6 mt-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Account Statistics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">0</div>
-              <div className="text-sm text-gray-600">Toys Added</div>
+              <div className="text-sm text-gray-600">Toys Purchased</div>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">0</div>
-              <div className="text-sm text-gray-600">Favorites</div>
+              <div className="text-2xl font-bold text-green-600">$0.00</div>
+              <div className="text-sm text-gray-600">Total Spent</div>
             </div>
             <div className="text-center p-4 bg-purple-50 rounded-lg">
               <div className="text-2xl font-bold text-purple-600">0</div>
-              <div className="text-sm text-gray-600">Reviews</div>
+              <div className="text-sm text-gray-600">Favorite Toys</div>
+            </div>
+            <div className="text-center p-4 bg-yellow-50 rounded-lg">
+              <div className="text-2xl font-bold text-yellow-600">0</div>
+              <div className="text-sm text-gray-600">Reviews Written</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Account Details */}
+        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Account Details</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">User ID</label>
+                <p className="text-gray-900 font-mono text-sm bg-gray-50 p-2 rounded">
+                  {user?.uid || 'Not available'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email Verified</label>
+                <p className={`text-sm font-medium ${user?.emailVerified ? 'text-green-600' : 'text-red-600'}`}>
+                  {user?.emailVerified ? '✓ Verified' : '✗ Not Verified'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Account Provider</label>
+                <p className="text-gray-900">
+                  {user?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 'Email/Password'}
+                </p>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Last Sign In</label>
+                <p className="text-gray-900">
+                  {user?.metadata?.lastSignInTime ? 
+                    new Date(user.metadata.lastSignInTime).toLocaleString() : 'Unknown'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Account Created</label>
+                <p className="text-gray-900">
+                  {user?.metadata?.creationTime ? 
+                    new Date(user.metadata.creationTime).toLocaleString() : 'Unknown'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Account Status</label>
+                <p className="text-green-600 font-medium">✓ Active</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between py-2 border-b border-gray-100">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-blue-600 text-sm">👤</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Profile updated</p>
+                  <p className="text-xs text-gray-500">Account information modified</p>
+                </div>
+              </div>
+              <span className="text-xs text-gray-400">Today</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-gray-100">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-green-600 text-sm">🔐</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Signed in</p>
+                  <p className="text-xs text-gray-500">Successful login to account</p>
+                </div>
+              </div>
+              <span className="text-xs text-gray-400">
+                {user?.metadata?.lastSignInTime ? 
+                  new Date(user.metadata.lastSignInTime).toLocaleDateString() : 'Unknown'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-purple-600 text-sm">🎉</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Account created</p>
+                  <p className="text-xs text-gray-500">Welcome to ToyVerse!</p>
+                </div>
+              </div>
+              <span className="text-xs text-gray-400">
+                {user?.metadata?.creationTime ? 
+                  new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}
+              </span>
             </div>
           </div>
         </div>
